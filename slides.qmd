@@ -1,0 +1,141 @@
+---
+title: "Evaluation of Omaha, NE Bridge Integrity"
+author: "Jack Macfadyen"
+format: revealjs
+editor: visual
+---
+
+## Premise
+
+-   The mayor of Omaha, NE has concerns about degrading transportation infrastructure
+-   What is the risk of a bridge collapse event over the next 5 years?
+-   What are the risks involved in a bridge collapse event?
+-   How can this risk be mitigated?
+
+------------------------------------------------------------------------
+
+## Outline
+
+-   Data and methods used
+-   Risk assessment
+-   What can be done
+
+------------------------------------------------------------------------
+
+## Data and Methods
+
+**Data Used:** National Bridge Inventory from the U.S. Federal Highway Administration
+
+**Key Variables:**
+
+-   Condition Ratings (0 to 9)
+    -   Rating of 0 = failed condition
+    -   Rating ≤ 4 = poor condition
+    -   Rating \> 4 = fair to good condition
+    -   Rating of 9 = excellent condition
+-   Year Built
+-   Average Daily Traffic
+
+------------------------------------------------------------------------
+
+## Data & Results
+
+**Figure 1: Distribution of bridge condition ratings in Douglas County**
+
+```{r, echo = FALSE}
+library(tidyverse)
+library(ggplot2)
+nbi_data <- read.csv("NE24.txt", header = TRUE)
+data <- nbi_data %>%
+  filter(COUNTY_CODE_003 == "55")
+data %>%
+  count(LOWEST_RATING) %>%
+  ggplot(aes(x = LOWEST_RATING, y = n)) +
+  geom_col(fill = "grey", color = "black") +
+  geom_text(aes(label = n, vjust = -0.2)) +
+  scale_x_continuous(breaks = unique(sort(data$LOWEST_RATING))) +
+  labs(
+    x = "Lowest Condition Rating",
+    y = "Count"
+  ) +
+  theme_minimal()
+```
+
+------------------------------------------------------------------------
+
+## Data & Results
+
+**Figure 2: Construction year distribution by lowest bridge condition rating**
+
+```{r, echo = FALSE}
+ggplot(data, aes(x = YEAR_BUILT_027, y = factor(LOWEST_RATING))) +
+  geom_boxplot(fill = "grey", color = "black") +
+  labs(
+    x = "Year Built",
+    y = "Lowest Condition Rating"
+  )
+```
+
+------------------------------------------------------------------------
+
+## Data & Results
+
+**Figure 3: Average daily traffic by bridge condition rating**
+
+```{r, echo = FALSE}
+a <- data %>% 
+  filter(LOWEST_RATING == 4) %>% 
+  summarise(Avg_Year_Poor = round(mean(YEAR_BUILT_027, na.rm = TRUE), 0)) %>%
+  pull(Avg_Year_Poor)
+
+b <- data %>% 
+  filter(LOWEST_RATING == 5) %>% 
+  summarise(Avg_Year_Not_Poor = round(mean(YEAR_BUILT_027, na.rm = TRUE), 0)) %>% 
+  pull(Avg_Year_Not_Poor)
+
+data %>%
+  group_by(LOWEST_RATING) %>%
+  summarise(mean_ADT = sum(ADT_029, na.rm = TRUE)) %>%
+  ggplot(aes(x = LOWEST_RATING, y = mean_ADT)) +
+  geom_col(fill = "grey", color = "black") +
+  geom_text(aes(label = round(mean_ADT)), vjust = -0.2) +
+  scale_x_continuous(breaks = scales::pretty_breaks()) +
+  labs(
+    x = "Lowest Condition Rating",
+    y = "Average Daily Traffic"
+  ) +
+  theme_minimal()
+```
+
+------------------------------------------------------------------------
+
+## Data & Results
+
+**Figure 4: Distribution of average daily traffic by bridge condition rating**
+
+```{r, echo = FALSE}
+ggplot(data, aes(x = ADT_029, y = factor(LOWEST_RATING))) +
+  geom_boxplot(fill = "grey", color = "black") +
+  labs(
+    x = "Average Daily Traffic",
+    y = "Lowest Condition Rating"
+  )
+```
+
+------------------------------------------------------------------------
+
+## What can be done
+
+**Priority Repairs:** Target 15 poor-condition bridges
+
+**Traffic Management:** Traffic Management: Monitor high-ADT bridges near I-80
+
+**Funding Strategy:** Allocate budget to replace poor-condition bridges
+
+------------------------------------------------------------------------
+
+## Conclusion
+
+-   **Low collapse risk** but aging infrastructure demands action
+-   Current bridge maintenance is successful
+-   Sustained funding for long-term safety is vital
